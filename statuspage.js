@@ -145,7 +145,7 @@ define(function(require, exports, module) {
                     // show banner for resolved incidents
                     Object.keys(unresolvedIncidents).forEach(function(id) {
                         if (!incidents[id]) {
-                            showBanner('Resolved: <a href="' + unresolvedIncidents[id].shortlink + '">' +
+                            showBanner('<strong>Resolved:<strong> <a href="' + unresolvedIncidents[id].shortlink + '">' +
                                 unresolvedIncidents[id].name + '</a>', true);
                         }
                     });
@@ -153,7 +153,7 @@ define(function(require, exports, module) {
                     // show banner for potentially new incidents
                     Object.keys(incidents).forEach(function(id) {
                         if (!unresolvedIncidents[id]) {
-                            showBanner('Incident: <a href="' + incidents[id].shortlink + '">' + incidents[id].name + '</a>');
+                            showBanner('<a href="' + incidents[id].shortlink + '">' + incidents[id].name + '</a>');
                         }
                     });
 
