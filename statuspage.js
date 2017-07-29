@@ -17,6 +17,7 @@ define(function(require, exports, module) {
 
         var statuspage = new StatusPage.page({ page: "g9mp5m2251ps"});
         var duration;
+        var intervalId;
         var notificationsEnabled = true;
 
         function load() {
@@ -24,6 +25,7 @@ define(function(require, exports, module) {
             // load css
             ui.insertCss(require("text!./style.css"), options.staticPrefix, plugin);
 
+            // settings and preferences
             settings.on("read", function() {
 
                 // enable status notificataions by default
@@ -89,10 +91,10 @@ define(function(require, exports, module) {
             });
 
             // fetch and update status initially
-            updateStatus();
+            updateIncidents();
 
             // fetch and update status periodically
-            setInterval(updateStatus, interval);
+            intervalId = setInterval(updateIncidents, interval);
         }
 
         /**
@@ -113,7 +115,7 @@ define(function(require, exports, module) {
         /**
          * Polls statuspage.io periodically for new/updated incidents and shows a banner for each incident update
          */
-        function updateStatus(){
+        function updateIncidents(){
 
             // return if stauts notifications are disabled
             if (!notificationsEnabled)
@@ -169,6 +171,7 @@ define(function(require, exports, module) {
         plugin.on("unload", function() {
             duration = null;
             notificationsEnabled = true;
+            clearInterval(intervalId);
         });
 
         plugin.freezePublicAPI({});
