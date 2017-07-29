@@ -1,1 +1,1 @@
-# harvard.cs50.statuspage
+# harvard.cs50.statuspage
