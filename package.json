@@ -1,0 +1,21 @@
+{
+  "name": "harvard.cs50.statuspage",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "contributors": [
+    {
+      "name": "Kareem Zidane",
+      "email": "kzidane@cs50.harvard.edu"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cs50/harvard.cs50.statuspage"
+  },
+  "plugins": {
+    "statuspage": {}
+  },
+  "categories": ["miscellaneous"],
+  "licenses": []
+}

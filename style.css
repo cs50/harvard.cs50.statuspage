@@ -1,0 +1,12 @@
+.cs50-statuspage-banner {
+    background-color: #f1c40f;
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+}
+.cs50-statuspage-banner a {
+    color: white;
+}
+.cs50-statuspage-resolved {
+    background-color: #2fcc66;
+}
