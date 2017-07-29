@@ -147,7 +147,7 @@ define(function(require, exports, module) {
                     // show banner for resolved incidents
                     Object.keys(unresolvedIncidents).forEach(function(id) {
                         if (!incidents[id]) {
-                            showBanner('<strong>Resolved:<strong> <a href="' + unresolvedIncidents[id].shortlink + '">' +
+                            showBanner('<strong>Resolved:</strong> <a href="' + unresolvedIncidents[id].shortlink + '">' +
                                 unresolvedIncidents[id].name + '</a>', true);
                         }
                     });
