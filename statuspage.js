@@ -16,7 +16,6 @@ define(function(require, exports, module) {
         var plugin = new Plugin("Ajax.org", main.consumes);
 
         var statuspage = new StatusPage.page({ page: "g9mp5m2251ps"});
-        var duration;
         var intervalId;
         var notificationsEnabled = true;
 
@@ -30,25 +29,8 @@ define(function(require, exports, module) {
 
                 // enable status notificataions by default
                 settings.setDefaults("user/cs50/statuspage", [
-                    ["duration", 5],
                     ["notifications", true]
                 ]);
-
-                // add preference spinner for notification duration
-                prefs.add({
-                   "CS50" : {
-                        position: 5,
-                        "IDE Information" : {
-                            position: 10,
-                            "Status Notification Duration (in seconds)" : {
-                                type: "spinner",
-                                path: "user/cs50/statuspage/@duration",
-                                min: 1,
-                                position: 200
-                            }
-                        }
-                    }
-                }, plugin);
 
                 // add preference toggle for notifications
                 prefs.add({
@@ -82,14 +64,6 @@ define(function(require, exports, module) {
                 interval = newInterval;
             });
 
-            // fetch current duration from settings or fallback to default duration
-            duration = (settings.getNumber("project/cs50/statuspage/@duration") || 5) * 1000;
-
-            // update duration when setting is updated
-            settings.on("user/cs50/statuspage/@duration", function(newDuration) {
-                duration = newDuration;
-            });
-
             // fetch and update status initially
             updateIncidents();
 
@@ -103,13 +77,8 @@ define(function(require, exports, module) {
         function showBanner(content, resolved, timeout) {
 
             // show banner
-            var hide = notify('<div class="cs50-statuspage-banner ' +  (resolved ? 'cs50-statuspage-resolved' : '')  +  '">' +
+            notify('<div class="cs50-statuspage-banner ' +  (resolved ? 'cs50-statuspage-resolved' : '')  +  '">' +
                 content + '</div>', true);
-
-            // hide banner after timeout or fallback to default timeout
-            setTimeout(function() {
-                hide();
-            }, timeout || duration)
         }
 
         /**
@@ -169,7 +138,6 @@ define(function(require, exports, module) {
         });
 
         plugin.on("unload", function() {
-            duration = null;
             notificationsEnabled = true;
             clearInterval(intervalId);
         });
