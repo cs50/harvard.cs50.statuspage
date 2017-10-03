@@ -96,7 +96,7 @@ define(function(require, exports, module) {
                 success: function(data) {
 
                     // fetch unresolved incidetns from settings
-                    var unresolvedIncidents = settings.getJson("project/cs50/statuspage/@incidents") || {};
+                    var unresolvedIncidents = settings.getJson("project/cs50/statuspage/incidents") || {};
 
                     // hash incidents for easy indexing
                     var incidents = {};
@@ -129,7 +129,7 @@ define(function(require, exports, module) {
                     });
 
                     // update unresolved incidents in settings
-                    settings.setJson("project/cs50/statuspage/@incidents", incidents);
+                    settings.setJson("project/cs50/statuspage/incidents", incidents);
             }});
         }
 
