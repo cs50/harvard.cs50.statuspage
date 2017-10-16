@@ -14,10 +14,11 @@ define(function(require, exports, module) {
         require("./lib/se-v2");
 
         var plugin = new Plugin("Ajax.org", main.consumes);
-
-        var statuspage = new StatusPage.page({ page: "g9mp5m2251ps"});
+        var PAGE_ID = "g9mp5m2251ps";
+        var statuspage = new StatusPage.page({ page: PAGE_ID});
         var intervalId;
         var notificationsEnabled = true;
+        var showingIncidents = [];
 
         function load() {
 
@@ -77,7 +78,7 @@ define(function(require, exports, module) {
         function showBanner(content, resolved, timeout) {
 
             // show banner
-            notify('<div class="cs50-statuspage-banner ' +  (resolved ? 'cs50-statuspage-resolved' : '')  +  '">' +
+            return notify('<div class="cs50-statuspage-banner ' +  (resolved ? 'cs50-statuspage-resolved' : '')  +  '">' +
                 content + '</div>', true);
         }
 
@@ -96,14 +97,14 @@ define(function(require, exports, module) {
                 success: function(data) {
 
                     // fetch unresolved incidetns from settings
-                    var unresolvedIncidents = settings.getJson("project/cs50/statuspage/incidents") || {};
+                    var unresolvedIncidents = settings.getJson("state/cs50/statuspage/incidents") || {};
 
                     // hash incidents for easy indexing
                     var incidents = {};
                     data.incidents.forEach(function(incident) {
 
                         // ignore incidents from other pages
-                        if (incident.page_id !== "g9mp5m2251ps")
+                        if (incident.page_id !== PAGE_ID)
                             return;
 
                         incidents[incident.id] = {
@@ -116,20 +117,36 @@ define(function(require, exports, module) {
                     // show banner for resolved incidents
                     Object.keys(unresolvedIncidents).forEach(function(id) {
                         if (!incidents[id]) {
-                            showBanner('<strong>Resolved:</strong> <a href="' + unresolvedIncidents[id].shortlink + '" target="_blank">' +
-                                unresolvedIncidents[id].name + '</a>', true);
+
+                            // hide yellow banner (if any) before showing green
+                            if (showingIncidents[id])
+                                showingIncidents[id]();
+
+                            // wait until yellow banner is hidden
+                            var interval = setInterval(function() {
+                                if (showingIncidents[id] && !showingIncidents[id].hasClosed)
+                                    return;
+
+                                clearInterval(interval);
+                                delete showingIncidents[id];
+
+                                // show green banner
+                                showBanner('<strong>Resolved:</strong> <a href="' + unresolvedIncidents[id].shortlink + '" target="_blank">' +
+                                    unresolvedIncidents[id].name + '</a>', true);
+                            }, 500);
                         }
                     });
 
                     // show banner for potentially new incidents
                     Object.keys(incidents).forEach(function(id) {
                         if (!unresolvedIncidents[id]) {
-                            showBanner('<a href="' + incidents[id].shortlink + '" target="_blank">' + incidents[id].name + '</a>');
+                            showingIncidents[id] = showBanner('<a href="' + incidents[id].shortlink + '" target="_blank">' + incidents[id].name + '</a>');
                         }
                     });
 
                     // update unresolved incidents in settings
-                    settings.setJson("project/cs50/statuspage/incidents", incidents);
+                    settings.setJson("state/cs50/statuspage/incidents", incidents);
+                    settings.save();
             }});
         }
 
@@ -139,6 +156,7 @@ define(function(require, exports, module) {
 
         plugin.on("unload", function() {
             notificationsEnabled = true;
+            showingIncidents = [];
             clearInterval(intervalId);
         });
 
