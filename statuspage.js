@@ -1,39 +1,39 @@
 define(function(require, exports, module) {
-    main.consumes = ["Plugin", "dialog.notification", "preferences", "settings", "ui"];
+    main.consumes = ["dialog.notification", "Plugin", "preferences", "settings", "ui"];
     main.provides = ["harvard.cs50.statuspage"];
     return main;
 
     function main(options, imports, register) {
-        var Plugin = imports.Plugin;
-        var notify = imports["dialog.notification"].show;
-        var prefs = imports["preferences"];
-        var settings = imports.settings;
-        var ui = imports.ui;
+        const Plugin = imports.Plugin;
+        const notify = imports["dialog.notification"].show;
+        const prefs = imports["preferences"];
+        const settings = imports.settings;
+        const ui = imports.ui;
 
-        // statuspage library
+        // Statuspage library
         require("./lib/se-v2");
 
-        var plugin = new Plugin("Ajax.org", main.consumes);
-        var PAGE_ID = "g9mp5m2251ps";
-        var statuspage = new StatusPage.page({ page: PAGE_ID});
-        var intervalId;
-        var notificationsEnabled = true;
-        var showingIncidents = [];
+        const plugin = new Plugin("Ajax.org", main.consumes);
+        const PAGE_ID = "g9mp5m2251ps";
+        const statuspage = new StatusPage.page({ page: PAGE_ID});
+        let intervalId;
+        let notificationsEnabled = true;
+        let showingIncidents = [];
 
         function load() {
 
-            // load css
+            // Load css
             ui.insertCss(require("text!./style.css"), options.staticPrefix, plugin);
 
-            // settings and preferences
-            settings.on("read", function() {
+            // Settings and preferences
+            settings.on("read", () => {
 
-                // enable status notificataions by default
+                // Enable status notificataions by default
                 settings.setDefaults("user/cs50/statuspage", [
                     ["notifications", true]
                 ]);
 
-                // add preference toggle for notifications
+                // Add preference toggle for notifications
                 prefs.add({
                    "CS50" : {
                         position: 5,
@@ -49,26 +49,26 @@ define(function(require, exports, module) {
                 }, plugin);
             });
 
-            // toggle status notifications when setting is updated
-            settings.on("user/cs50/statuspage/@notifications", function (value) {
+            // Toggle status notifications when setting is updated
+            settings.on("user/cs50/statuspage/@notifications", value => {
                 notificationsEnabled = value;
             });
 
-            // whether status notifications are enabled initially
+            // Whether status notifications are enabled initially
             notificationsEnabled = settings.getBool("user/cs50/statuspage/@notifications");
 
-            // fetch current interval from settings or fallback to default interval
+            // Fetch current interval from settings or fallback to default interval
             interval = (settings.getNumber("user/cs50/statuspage/@interval") || 30) * 1000;
 
-            // update interval when setting is updated
-            settings.on("user/cs50/statuspage/@interval", function(newInterval) {
+            // Update interval when setting is updated
+            settings.on("user/cs50/statuspage/@interval", newInterval => {
                 interval = newInterval;
             });
 
-            // fetch and update status initially
+            // Fetch and update status initially
             updateIncidents();
 
-            // fetch and update status periodically
+            // Fetch and update status periodically
             intervalId = setInterval(updateIncidents, interval);
         }
 
@@ -77,7 +77,7 @@ define(function(require, exports, module) {
          */
         function showBanner(content, resolved, timeout) {
 
-            // show banner
+            // Show banner
             return notify('<div class="cs50-statuspage-banner ' +  (resolved ? 'cs50-statuspage-resolved' : '')  +  '">' +
                 content + '</div>', true);
         }
@@ -87,23 +87,23 @@ define(function(require, exports, module) {
          */
         function updateIncidents(){
 
-            // return if stauts notifications are disabled
+            // Return if stauts notifications are disabled
             if (!notificationsEnabled)
                 return;
 
-            // fetch and update unresolved incidents
+            // Fetch and update unresolved incidents
             statuspage.incidents({
                 filter: "unresolved",
-                success: function(data) {
+                success(data) {
 
-                    // fetch unresolved incidetns from settings
-                    var unresolvedIncidents = settings.getJson("state/cs50/statuspage/incidents") || {};
+                    // Fetch unresolved incidetns from settings
+                    const unresolvedIncidents = settings.getJson("state/cs50/statuspage/incidents") || {};
 
-                    // hash incidents for easy indexing
-                    var incidents = {};
-                    data.incidents.forEach(function(incident) {
+                    // Hash incidents for easy indexing
+                    const incidents = {};
+                    data.incidents.forEach(incident => {
 
-                        // ignore incidents from other pages
+                        // Ignore incidents from other pages
                         if (incident.page_id !== PAGE_ID)
                             return;
 
@@ -114,47 +114,47 @@ define(function(require, exports, module) {
                         };
                     });
 
-                    // show banner for resolved incidents
-                    Object.keys(unresolvedIncidents).forEach(function(id) {
+                    // Show banner for resolved incidents
+                    Object.keys(unresolvedIncidents).forEach(id => {
                         if (!incidents[id]) {
 
-                            // hide yellow banner (if any) before showing green
+                            // Hide yellow banner (if any) before showing green
                             if (showingIncidents[id])
                                 showingIncidents[id]();
 
-                            // wait until yellow banner is hidden
-                            var interval = setInterval(function() {
+                            // Wait until yellow banner is hidden
+                            var interval = setInterval(() => {
                                 if (showingIncidents[id] && !showingIncidents[id].hasClosed)
                                     return;
 
                                 clearInterval(interval);
                                 delete showingIncidents[id];
 
-                                // show green banner
+                                // Show green banner
                                 showBanner('<strong>Resolved:</strong> <a href="' + unresolvedIncidents[id].shortlink + '" target="_blank">' +
                                     unresolvedIncidents[id].name + '</a>', true);
                             }, 500);
                         }
                     });
 
-                    // show banner for potentially new incidents
-                    Object.keys(incidents).forEach(function(id) {
+                    // Show banner for potentially new incidents
+                    Object.keys(incidents).forEach(id => {
                         if (!unresolvedIncidents[id]) {
                             showingIncidents[id] = showBanner('<a href="' + incidents[id].shortlink + '" target="_blank">' + incidents[id].name + '</a>');
                         }
                     });
 
-                    // update unresolved incidents in settings
+                    // Update unresolved incidents in settings
                     settings.setJson("state/cs50/statuspage/incidents", incidents);
                     settings.save();
             }});
         }
 
-        plugin.on("load", function() {
+        plugin.on("load", () => {
             load();
         });
 
-        plugin.on("unload", function() {
+        plugin.on("unload", () => {
             notificationsEnabled = true;
             showingIncidents = [];
             clearInterval(intervalId);
