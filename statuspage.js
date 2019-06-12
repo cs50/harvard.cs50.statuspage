@@ -23,7 +23,7 @@ define(function(require, exports, module) {
         function load() {
 
             // Load css
-            ui.insertCss(require("text!./style.css"), options.staticPrefix, plugin);
+            ui.insertCss(require("text!./style.css"), plugin);
 
             // Settings and preferences
             settings.on("read", () => {
